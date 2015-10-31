@@ -3,7 +3,7 @@ package chess.challenge
 /**
  * Base trait for Kings, Queens, Knights, etc...
  */
-trait Piece
+class Piece
 case object King extends Piece
 case object Queen extends Piece
 case object Bishop extends Piece
