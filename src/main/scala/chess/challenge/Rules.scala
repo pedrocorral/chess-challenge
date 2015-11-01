@@ -6,7 +6,22 @@ package chess.challenge
  */
 object Rules {
 
+  /**
+   * Does a position use the same square than other?
+   *
+   * @param p0
+   * @param p1
+   * @return
+   */
   def collision( p0: Position, p1: Position ): Boolean = p0._1 == p1._1 && p0._2 == p1._2
+
+  /**
+   * Has been used this position (with any other piece) previously?
+   *
+   * @param position
+   * @param distribution
+   * @return
+   */
   def collision( position: Position, distribution: Distribution ): Boolean = distribution match {
     case Nil => false
     case _ => distribution.exists { collision( position, _ ) }

@@ -11,6 +11,16 @@ package chess.challenge
  */
 case class Grid( ranks: Int, files : Int ) {
 
+  /**
+   * Given a string (i.e: "KQQNRR") a folding function for the results and a starting value, it returns
+   * the value of the folding function over all the valid found results
+   *
+   * @param pieces
+   * @param first_value
+   * @param foldResults
+   * @tparam A
+   * @return
+   */
   def apply[A]( pieces: String, first_value: A, foldResults: (A,Distribution) => A ): A = apply(
     pieces.toList.map { _ match {
       case 'K' => King
@@ -24,12 +34,32 @@ case class Grid( ranks: Int, files : Int ) {
     foldResults
   )
 
+  /**
+   * Given a string (i.e: "KQQNRR") a folding function for the results and a starting value, it returns
+   * the value of the folding function over all the valid found results
+   *
+   * @param pieces
+   * @param first_value
+   * @param foldResults
+   * @tparam A
+   * @return
+   */
   def apply[A]( pieces: List[Piece], first_value: A, foldResults: (A,Distribution) => A ): A = apply(
     pieces.groupBy( identity ).mapValues( _.length ),
     first_value,
     foldResults
   )
 
+  /**
+   * Given a string (i.e: "KQQNRR") a folding function for the results and a starting value, it returns
+   * the value of the folding function over all the valid found results
+   *
+   * @param pieces
+   * @param first_value
+   * @param foldResults
+   * @tparam A
+   * @return
+   */
   def apply[A]( pieces: Map[Piece,Int], first_value: A, foldResults: (A,Distribution) => A): A = {
     val all_sorted_pieces = pieces.map {
       case (piece, total) => List.fill(total)(piece)
@@ -38,9 +68,27 @@ case class Grid( ranks: Int, files : Int ) {
     distribute( None, Nil, all_sorted_pieces, first_value, foldResults )
   }
 
+  /**
+   * We want to transform the position from index (one dimensional) to two variables (rank and file)
+   *
+   * @param index
+   * @param piece
+   * @return
+   */
   def indexToPosition( index: Int, piece: Piece ): Position = ( index/ranks, index%ranks, piece )
 
-  def distribute[A]( previous: Option[(Int,Piece)], valid_distribution: Distribution, pieces: List[Piece], previous_value: A, foldResults: (A,Distribution) => A ): A =
+  /**
+   * This function is private, because it is implicit that needs the list of pieces to be sorted by type
+   *
+   * @param previous
+   * @param valid_distribution
+   * @param pieces
+   * @param previous_value
+   * @param foldResults
+   * @tparam A
+   * @return
+   */
+  private def distribute[A]( previous: Option[(Int,Piece)], valid_distribution: Distribution, pieces: List[Piece], previous_value: A, foldResults: (A,Distribution) => A ): A =
     pieces match {
       case x::xs => {
         def startFrom = previous match {

@@ -39,13 +39,6 @@ class Distributions extends FlatSpec {
   }
 
   "2x2 distributions" should "be created for any combination of two pieces" in {
-    val range_map = Map[Piece,Int](
-      Queen -> 0,
-      King -> 0,
-      Bishop -> 8,
-      Rook -> 4,
-      Knight -> 12
-    )
     def validDistributions( piece0: Piece, piece1: Piece ): Int = ( piece0, piece1 ) match {
       case (Queen,_) | (_,Queen) => 0
       case (King,_) | (_,King) => 0
