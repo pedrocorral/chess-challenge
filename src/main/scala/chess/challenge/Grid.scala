@@ -11,13 +11,7 @@ package chess.challenge
  */
 case class Grid( ranks: Int, files : Int ) {
 
-  /**
-   * Should be the distribution builder, based on string like "KRRB" {King,Rook,Rook,Bishop}
-   *
-   * @param pieces
-   * @return
-   */
-  def initialDistribution( pieces: String ): Distribution = initialDistribution(
+  def apply[A]( pieces: String, first_value: A, foldResults: (A,Distribution) => A ): A = apply(
     pieces.toList.map { _ match {
       case 'K' => King
       case 'Q' => Queen
@@ -25,53 +19,48 @@ case class Grid( ranks: Int, files : Int ) {
       case 'R' => Rook
       case 'N' => Knight
       case x => throw new Error( s"ERRoR::Grid($ranks,$files)::initialDistribution::Invalid piece => '$x' while creating the initial distribution" )
-    } }
+    } },
+    first_value,
+    foldResults
   )
 
-  def initialDistribution( pieces: List[Piece] ): Distribution = initialDistribution(
-    pieces.groupBy( identity ).mapValues( _.length )
+  def apply[A]( pieces: List[Piece], first_value: A, foldResults: (A,Distribution) => A ): A = apply(
+    pieces.groupBy( identity ).mapValues( _.length ),
+    first_value,
+    foldResults
   )
 
-  def initialDistribution( pieces: Map[Piece,Int] ): Distribution = {
-    val distribution_candidate: Distribution = pieces.flatMap {
+  def apply[A]( pieces: Map[Piece,Int], first_value: A, foldResults: (A,Distribution) => A): A = {
+    val all_sorted_pieces = pieces.map {
       case (piece, total) => List.fill(total)(piece)
-    }.scanLeft( (0,-1,new Piece) )( {
-      case ( (rank,file,_), piece ) => nextPosition( rank, file, piece ).getOrElse {
-        throw new Error( s"ERRoR::Grid($ranks,$files)::initialDistribution::Unable to create piece => $piece after ($rank,$file)" )
+    }.flatten.toList
+
+    distribute( None, Nil, all_sorted_pieces, first_value, foldResults )
+  }
+
+  def indexToPosition( index: Int, piece: Piece ): Position = ( index/ranks, index%ranks, piece )
+
+  def distribute[A]( previous: Option[(Int,Piece)], valid_distribution: Distribution, pieces: List[Piece], previous_value: A, foldResults: (A,Distribution) => A ): A =
+    pieces match {
+      case x::xs => {
+        def startFrom = previous match {
+          case None => 0
+          case Some( (_,piece) ) if x != piece => 0
+          case Some( (index,piece) ) => index + 1
+        }
+        val previous_indices = valid_distribution.map { case( rank, file, _ ) => rank*ranks + file }
+        ( startFrom until ranks*files ).filter( !previous_indices.contains(_) ).foldLeft( previous_value ) {
+          case ( previous_value, index ) =>
+            val position = indexToPosition( index, x )
+            if ( Rules.mutualThreaten( position, valid_distribution ) ) previous_value
+            else distribute( Some(index,x), position::valid_distribution, xs, previous_value, foldResults )
+        }
       }
-    } ).toList.tail
-
-    if ( Rules.isValid( distribution_candidate ) ) distribution_candidate
-    else nextValidDistribution( distribution_candidate ).getOrElse {
-      throw new Error( s"ERRoR::Grid($ranks,$files)::initialDistribution::Unable to create one single valid distribution" )
-    }
-  }
-
-  def nextValidDistribution( distribution: Distribution ): Option[Distribution] = {
-
-    def resetPosition( position: Position ) = (0,-1,position._3)
-
-    def nextAvailableDistribution( position: Position, rest_of_distribution: Distribution ): Option[Distribution] = nextPosition( position ) match {
-      case None => nextValidDistribution( rest_of_distribution ) match {
-        case None => None
-        case Some( new_rest_of_distribution ) => nextAvailableDistribution( resetPosition(position), new_rest_of_distribution )
+      case Nil => valid_distribution match {
+        case Nil => throw new Error( "ERRoR::Grid($ranks,$files)::distribute::No more pieces but no valid distribution!" )
+        case _ => foldResults( previous_value, valid_distribution )
       }
-      case Some( new_position ) if !Rules.collision( position, rest_of_distribution ) && Rules.isValid( new_position::rest_of_distribution ) => Some( new_position :: rest_of_distribution )
-      case Some( new_position ) => nextAvailableDistribution( new_position, rest_of_distribution )
     }
-
-    distribution match {
-      case Nil => None
-      case x::xs => nextAvailableDistribution( x, xs )
-    }
-  }
-
-  def nextPosition( position: Position ): Option[Position] = nextPosition( position._1, position._2, position._3 )
-  def nextPosition( rank: Int, file: Int, piece: Piece ): Option[Position] = ( ranks - rank, files - file ) match {
-    case (1,1) => None
-    case (_,1) => Some( (rank+1,0,piece) )
-    case _ => Some( (rank,file+1,piece) )
-  }
 
 }
 

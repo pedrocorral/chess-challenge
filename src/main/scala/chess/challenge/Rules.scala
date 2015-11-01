@@ -12,7 +12,27 @@ object Rules {
     case _ => distribution.exists { collision( position, _ ) }
   }
 
-  def isValid( distribution: Distribution ): Boolean = true // .: For the moment, everything is valid :. //
+  /**
+   * We want a distribution where all of the pieces do not threaten any other
+   *
+   * @param distribution
+   * @return
+   */
+  def isValid( distribution: Distribution ): Boolean = distribution match {
+    case Nil => true
+    case x::xs => xs.forall( y => !collision(x,y) && !mutualThreaten(x,y) ) && isValid( xs )
+  }
+
+  def mutualThreaten( p: Position, distribution: Distribution ): Boolean = !distribution.forall( !mutualThreaten(p,_) )
+
+  /**
+   * Does any of the pieces threaten the other one?
+   *
+   * @param p0
+   * @param p1
+   * @return
+   */
+  def mutualThreaten( p0: Position, p1: Position ): Boolean = threatens( p0, p1 ) || threatens( p1, p0 )
 
   /**
    * Does the first piece threat the other?
@@ -21,7 +41,7 @@ object Rules {
    * @param p1
    * @return
    */
-  def threats( p0: Position, p1: Position ): Boolean = p0 match {
+  def threatens( p0: Position, p1: Position ): Boolean = p0 match {
     case (_,_,Rook) => rookThreatens( p0, p1 )
     case (_,_,Bishop) => bishopThreatens( p0, p1 )
     case (_,_,King) => kingThreatens( p0, p1 )

@@ -24,7 +24,7 @@ class Rules extends FlatSpec {
         piece_rank <- (0 until squares) if main_piece_rank != piece_rank
         main_piece_file <- (0 until squares)
         piece_file <- (0 until squares) if main_piece_file != piece_rank
-      } Rules.threats(
+      } Rules.threatens(
           (main_piece_rank,main_piece_file,main_piece),
           (piece_rank,piece_file,piece)
         ) shouldBe rule( main_piece_rank, main_piece_file, piece_rank, piece_file )
