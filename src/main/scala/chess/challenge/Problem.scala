@@ -23,8 +23,8 @@ object Main extends App {
 
     val pieces = "QKBNQKB"
     val blind_fold_results = ( n: Int, d: Distribution, g: Grid ) => n+1
-    val n = Grid( 7, 7 )( pieces, 0, blind_fold_results )
-    // val n = Grid( 7, 7 )( pieces, 0, Output.foldResults )
+    //val n = Grid( 7, 7 )( pieces, 0, blind_fold_results )
+    val n = Grid( 7, 7 )( pieces, 0, Output.foldResults )
     println( s"The total number of valid distributions is => $n" )
     println( "To see the time, please see the seconds below. Thank you" )
   }

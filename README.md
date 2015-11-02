@@ -3,7 +3,7 @@ Chess Challenge
 
 As usual, this code uses sbt for its compilation, testing and running.
 
-The problem is the method (by default) of the "Main" object. You can call it directly by using "run" from sbt.
+The problem is the main method (by default) of the "Main" object. You can call it directly by using "run" from sbt. But take care, it is very verbose. Maybe you would like to use the "blind_fold_results" for do the job without dumping so much test. Up to you.
 
 In the other hand, if you want to run the tests, you only need to use "test" from sbt.
 
