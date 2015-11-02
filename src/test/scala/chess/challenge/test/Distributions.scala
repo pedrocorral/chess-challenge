@@ -7,7 +7,7 @@ import org.scalatest._
 
 class Distributions extends FlatSpec with Inspectors with Matchers {
 
-  lazy val foldResults = (distributions: List[Distribution], distribution: Distribution) => distribution :: distributions
+  lazy val foldResults = (distributions: List[Distribution], distribution: Distribution, grid: Grid ) => distribution :: distributions
 
   "Easy 2x2 distribution" should "be created for two rooks" in {
     val xs = Grid(2, 2)( "RR", Nil, foldResults )

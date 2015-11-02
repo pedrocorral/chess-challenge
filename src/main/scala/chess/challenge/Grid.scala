@@ -21,7 +21,7 @@ case class Grid( ranks: Int, files : Int ) {
    * @tparam A
    * @return
    */
-  def apply[A]( pieces: String, first_value: A, foldResults: (A,Distribution) => A ): A = apply(
+  def apply[A]( pieces: String, first_value: A, foldResults: (A,Distribution,Grid) => A ): A = apply(
     pieces.toList.map { _ match {
       case 'K' => King
       case 'Q' => Queen
@@ -44,7 +44,7 @@ case class Grid( ranks: Int, files : Int ) {
    * @tparam A
    * @return
    */
-  def apply[A]( pieces: List[Piece], first_value: A, foldResults: (A,Distribution) => A ): A = apply(
+  def apply[A]( pieces: List[Piece], first_value: A, foldResults: (A,Distribution,Grid) => A ): A = apply(
     pieces.groupBy( identity ).mapValues( _.length ),
     first_value,
     foldResults
@@ -60,7 +60,7 @@ case class Grid( ranks: Int, files : Int ) {
    * @tparam A
    * @return
    */
-  def apply[A]( pieces: Map[Piece,Int], first_value: A, foldResults: (A,Distribution) => A): A = {
+  def apply[A]( pieces: Map[Piece,Int], first_value: A, foldResults: (A,Distribution,Grid) => A): A = {
     val all_sorted_pieces = pieces.map {
       case (piece, total) => List.fill(total)(piece)
     }.flatten.toList
@@ -88,7 +88,7 @@ case class Grid( ranks: Int, files : Int ) {
    * @tparam A
    * @return
    */
-  private def distribute[A]( previous: Option[(Int,Piece)], valid_distribution: Distribution, pieces: List[Piece], previous_value: A, foldResults: (A,Distribution) => A ): A =
+  private def distribute[A]( previous: Option[(Int,Piece)], valid_distribution: Distribution, pieces: List[Piece], previous_value: A, foldResults: (A,Distribution,Grid) => A ): A =
     pieces match {
       case x::xs => {
         def startFrom = previous match {
@@ -106,7 +106,7 @@ case class Grid( ranks: Int, files : Int ) {
       }
       case Nil => valid_distribution match {
         case Nil => throw new Error( "ERRoR::Grid($ranks,$files)::distribute::No more pieces but no valid distribution!" )
-        case _ => foldResults( previous_value, valid_distribution )
+        case _ => foldResults( previous_value, valid_distribution, this )
       }
     }
 
